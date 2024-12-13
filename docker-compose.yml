@@ -1,3 +1,4 @@
+version: "3.8"
 services:
   # Servicio de base de datos MySQL
   db:
@@ -17,17 +18,30 @@ services:
     build: .
     container_name: api-backend
     ports:
-      - "3000:3000" # Exponemos el puerto 3000 para que el backend sea accesible desde el host
+      - "3000:3000"
     environment:
       - DB_HOST=db
       - DB_USER=root
       - DB_PASSWORD=root
       - DB_NAME=api_challenge
     depends_on:
-      - db # El contenedor de la app depende de que el contenedor de la base de datos esté arriba
+      - db 
     volumes:
       - .:/app
     command: npx ts-node src/index.ts
+
+  # Servicio para Swagger UI
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger_ui
+    ports:
+      - "8080:8080"
+    environment:
+      - SWAGGER_JSON=/app/swagger.json
+    depends_on:
+      - app
+    volumes:
+      - ./swagger.json:/app/swagger.json
 
 volumes:
   db_data:

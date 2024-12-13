@@ -1,24 +1,26 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "API ch allenge",
+    "title": "API sistema de gestión para alquiler de monopatines",
     "version": "1.0.0",
-    "description": "API para gestionar el alquiler de scooters."
+    "description": "Esta API permite gestionar el alquiler de monopatines en diversas ubicaciones, incluyendo un sistema de bonificación y penalización. Además, mantiene un registro detallado de todas las operaciones realizadas, garantizando la trazabilidad y el control de los movimientos de los monopatines."
   },
   "servers": [
     {
-      "url": "http://localhost:3000",
-      "description": "Servidor local"
+      "url": "http://localhost:3000/api-docs/",
+      "description": "Docker"
     }
   ],
   "paths": {
     "/api/scooters/locations": {
       "get": {
-        "summary": "Lista de las 6 ubicaciones",
-        "tags": ["Scooters"],
+        "tags": [
+          "Scooters"
+        ],
+        "summary": "Lista de los 6 puntos de la ciudad",
         "responses": {
           "200": {
-            "description": "Lista de las 6 ubicaciones id, locacion y direccion",
+            "description": "Este endpoint gestiona la información de los diferentes puntos disponibles en la ciudad, incluyendo detalles sobre las ubicaciones.",
             "content": {
               "application/json": {
                 "schema": {
@@ -38,14 +40,16 @@
     },
     "/api/scooters/locations/{locationId}": {
       "get": {
-        "summary": "Listar scooters de una ubicación",
-        "tags": ["Scooters"],
+        "summary": "Listar scooters disponibles en una ubicación",
+        "tags": [
+          "Scooters"
+        ],
         "parameters": [
           {
             "name": "locationId",
             "in": "path",
             "required": true,
-            "description": "ID de la ubicación",
+            "description": "ID de la ubicación para obtener una lista de scooters disponibles en dicha ubicación.",
             "schema": {
               "type": "integer"
             }
@@ -53,13 +57,41 @@
         ],
         "responses": {
           "200": {
-            "description": "Lista de scooters en la ubicación",
+            "description": "Lista de scooters disponibles en la ubicación especificada",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Scooter"
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "ID único del scooter"
+                      },
+                      "identifier": {
+                        "type": "string",
+                        "description": "Identificador único del scooter"
+                      }
+                    },
+                    "example": [
+                      {
+                        "id": 4,
+                        "identifier": "SCOOTER_4"
+                      },
+                      {
+                        "id": 7,
+                        "identifier": "SCOOTER_7"
+                      },
+                      {
+                        "id": 14,
+                        "identifier": "SCOOTER_14"
+                      },
+                      {
+                        "id": 19,
+                        "identifier": "SCOOTER_19"
+                      }
+                    ]
                   }
                 }
               }
@@ -77,7 +109,9 @@
     "/api/rentals/rent": {
       "post": {
         "summary": "Alquilar un scooter",
-        "tags": ["Rentals"],
+        "tags": [
+          "Rentals"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -90,31 +124,127 @@
         },
         "responses": {
           "200": {
-            "description": "Scooter alquilado exitosamente",
+            "description": "La solicitud de alquiler de un scooter se procesa correctamente. Se valida la disponibilidad del scooter, la existencia del usuario, y se aplican bonificaciones o penalizaciones según las reglas del sistema. Además, se verifica que el usuario no tenga otro alquiler activo.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "message": {
-                      "type": "string"
+                      "type": "string",
+                      "description": "Mensaje indicando el resultado de la operación."
                     },
                     "availableMinutes": {
-                      "type": "integer"
+                      "type": "integer",
+                      "description": "Minutos disponibles para el uso del scooter después de aplicar bonificaciones y penalizaciones."
                     }
+                  },
+                  "example": {
+                    "message": "Scooter rented successfully",
+                    "availableMinutes": 120
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Error en la solicitud (parámetros inválidos o scooter no disponible)"
-          },
-          "404": {
-            "description": "Usuario o scooter no encontrado"
-          },
-          "500": {
-            "description": "Error interno del servidor"
+            "description": "Solicitud inválida, puede ser por los siguientes errores:",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Descripción del error"
+                    }
+                  },
+                  "example": {
+                    "error": "Not enough available time"
+                  }
+                },
+                "examples": {
+                  "Not enough available time": {
+                    "value": {
+                      "error": "Not enough available time"
+                    }
+                  },
+                  "User already has an active rental": {
+                    "value": {
+                      "error": "User already has an active rental"
+                    }
+                  },
+                  "User is temporarily blocked from renting scooters": {
+                    "value": {
+                      "error": "User is temporarily blocked from renting scooters"
+                    }
+                  },
+                  "Not enough available time. User is blocked for 7 days.": {
+                    "value": {
+                      "error": "Not enough available time. User is blocked for 7 days."
+                    }
+                  },
+                  "Scooter not found for return": {
+                    "value": {
+                      "error": "Scooter not found for return"
+                    }
+                  },
+                  "No scooters available at this location": {
+                    "value": {
+                      "error": "No scooters available at this location"
+                    }
+                  },
+                  "Location is full, cannot return scooter": {
+                    "value": {
+                      "error": "Location is full, cannot return scooter"
+                    }
+                  },
+                  "The scooter is not at that location": {
+                    "value": {
+                      "error": "The scooter is not at that location"
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Usuario o scooter no encontrado. Esto puede ocurrir si el DNI del usuario no existe o si el scooter especificado no se encuentra en la base de datos.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string",
+                        "description": "Descripción del error"
+                      }
+                    },
+                    "example": {
+                      "error": "User not found"
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Error interno del servidor. Puede ser un problema con la base de datos o el sistema de alquiler.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string",
+                        "description": "Descripción del error"
+                      }
+                    },
+                    "example": {
+                      "error": "Internal server error"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -122,99 +252,234 @@
     "/api/rentals/return": {
       "post": {
         "summary": "Devolver un scooter",
-        "tags": ["Rentals"],
+        "tags": [
+          "Rentals"
+        ],
+        "description": "Permite a un usuario devolver un monopatín a una ubicación específica. Si el usuario tiene un alquiler activo y la ubicación de destino está disponible, el monopatín será devuelto correctamente.",
+        "operationId": "returnScooter",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReturnRequest"
+                "type": "object",
+                "properties": {
+                  "dni": {
+                    "type": "string",
+                    "description": "El DNI del usuario que está devolviendo el monopatín.",
+                    "example": "12345678A"
+                  },
+                  "scooter_id": {
+                    "type": "integer",
+                    "description": "El ID del monopatín que se va a devolver.",
+                    "example": 15
+                  },
+                  "location_id": {
+                    "type": "integer",
+                    "description": "El ID de la ubicación donde se devolverá el monopatín.",
+                    "example": 2
+                  }
+                },
+                "required": [
+                  "dni",
+                  "scooter_id",
+                  "location_id"
+                ]
               }
             }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Scooter devuelto exitosamente",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
+          },
+          "responses": {
+            "200": {
+              "description": "Devolución exitosa del monopatín.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "example": "Scooter returned successfully"
+                      },
+                      "totalMinutes": {
+                        "type": "integer",
+                        "example": 150
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Error de validación, ubicación llena o error inesperado.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string",
+                        "example": "Location is full, cannot return scooter"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "No se encuentra el usuario, el monopatín o la ubicación.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string",
+                        "example": "User not found"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Error interno del servidor.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "error": {
+                        "type": "string",
+                        "example": "Internal server error"
+                      }
                     }
                   }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Error en la solicitud (ubicación incorrecta o llena)"
-          },
-          "404": {
-            "description": "Scooter o usuario no encontrado"
-          },
-          "500": {
-            "description": "Error interno del servidor"
           }
         }
       }
     },
     "/api/rentals/{id}": {
       "get": {
-        "summary": "Obtener alquileres de un usuario",
-        "tags": ["Rentals"],
+        "summary": "Reporte de ventas entre fechas, total de minutos alquilados y beneficios acumulados",
+        "description": "En este endpoint pasandole el id del usuario se obtiene un reporte de ventas entre fechas, total de minutos alquilados y beneficios acumulados hasta la fecha",
+        "tags": [
+          "Report"
+        ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "ID del usuario",
+            "description": " El ID del usuario para el que se recuperarán los alquileres.",
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "example": 1
             }
           },
           {
             "name": "start_time",
             "in": "query",
             "required": false,
-            "description": "Tiempo de inicio del filtro",
+            "description": "La fecha de inicio para filtrar los alquileres. Formato: YYYY-MM-DDTHH:mm:ss",
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "example": "2024-12-01T00:00:00"
             }
           },
           {
             "name": "end_time",
             "in": "query",
             "required": false,
-            "description": "Tiempo de fin del filtro",
+            "description": "La fecha de fin para filtrar los alquileres. Formato: YYYY-MM-DDTHH:mm:ss",
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "example": "2024-12-31T23:59:59"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Lista de alquileres del usuario",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Rental"
+                  "type": "object",
+                  "properties": {
+                    "rentals": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "scooter_id": {
+                            "type": "integer"
+                          },
+                          "start_time": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "end_time": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "total_minutes": {
+                            "type": "integer"
+                          },
+                          "initial_location": {
+                            "type": "integer"
+                          },
+                          "final_location": {
+                            "type": "integer"
+                          }
+                        },
+                        "example": {
+                          "id": 41,
+                          "scooter_id": 1,
+                          "start_time": "2024-12-13T09:00:00.000Z",
+                          "end_time": "2024-12-13T11:00:00.000Z",
+                          "total_minutes": 120,
+                          "initial_location": 1,
+                          "final_location": 2
+                        }
+                      }
+                    },
+                    "totalMinutes": {
+                      "type": "integer",
+                      "example": 240
+                    },
+                    "bonusMinutes": {
+                      "type": "integer",
+                      "example": 30
+                    }
                   }
                 }
               }
             }
           },
-          "404": {
-            "description": "Usuario no encontrado"
-          },
           "500": {
-            "description": "Error interno del servidor"
+            "description": "Error fetching rentals data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Error fetching rentals data"
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Error retrieving rentals"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -225,45 +490,41 @@
       "Location": {
         "type": "object",
         "properties": {
-          "id": { "type": "integer" },
-          "name": { "type": "string" },
-          "address": { "type": "string" }
-        }
-      },
-      "Scooter": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "location_id": { "type": "integer" },
-          "is_available": { "type": "boolean" }
+          "id": {
+            "type": "integer",
+            "description": "ID de la ubicación"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre de la ubicación"
+          }
+        },
+        "example": {
+          "id": 1,
+          "name": "Caballito",
+          "address": "Av. Rivadavia 5000"
         }
       },
       "RentRequest": {
         "type": "object",
         "properties": {
-          "dni": { "type": "string" },
-          "scooter_id": { "type": "integer" },
-          "location_id": { "type": "integer" }
+          "dni": {
+            "type": "string",
+            "description": "DNI del usuario que realiza el alquiler"
+          },
+          "scooter_id": {
+            "type": "integer",
+            "description": "ID del monopatín a alquilar"
+          },
+          "location_id": {
+            "type": "integer",
+            "description": "ID de la ubicación de alquiler"
+          }
         },
-        "required": ["dni", "scooter_id", "location_id"]
-      },
-      "ReturnRequest": {
-        "type": "object",
-        "properties": {
-          "dni": { "type": "string" },
-          "scooter_id": { "type": "integer" },
-          "location_id": { "type": "integer" }
-        },
-        "required": ["dni", "scooter_id", "location_id"]
-      },
-      "Rental": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "integer" },
-          "user_id": { "type": "integer" },
-          "scooter_id": { "type": "integer" },
-          "start_time": { "type": "string", "format": "date-time" },
-          "end_time": { "type": "string", "format": "date-time" }
+        "example": {
+          "dni": 12345678,
+          "scooter_id": "1",
+          "location_id": "1"
         }
       }
     }
