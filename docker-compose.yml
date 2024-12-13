@@ -1,0 +1,33 @@
+services:
+  # Servicio de base de datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: api_challenge
+    ports:
+      - "3306:3306" 
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Servicio del backend (Node.js)
+  app:
+    build: .
+    container_name: api-backend
+    ports:
+      - "3000:3000" # Exponemos el puerto 3000 para que el backend sea accesible desde el host
+    environment:
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_NAME=api_challenge
+    depends_on:
+      - db # El contenedor de la app depende de que el contenedor de la base de datos esté arriba
+    volumes:
+      - .:/app
+    command: npx ts-node src/index.ts
+
+volumes:
+  db_data:

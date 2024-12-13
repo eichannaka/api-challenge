@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                         // Es correcto, ya que estás utilizando características modernas de JS.
+    "module": "CommonJS",                       // Ideal para proyectos de Node.js.
+    "outDir": "./dist",                         // Correcto, la salida compilada será en esta carpeta.
+    "rootDir": "./src",                         // Define el directorio raíz de tus archivos fuente.
+    "strict": true,                             // Habilita todas las comprobaciones estrictas, muy recomendable.
+    "esModuleInterop": true,                    // Correcto, para importar módulos en forma compatible con ES.
+    "skipLibCheck": true,                       // Mejora el rendimiento al omitir la verificación de las bibliotecas.
+    "resolveJsonModule": true,                  // Permite importar archivos JSON como módulos.
+    "forceConsistentCasingInFileNames": true,   // Asegura que los nombres de los archivos tengan consistencia en mayúsculas/minúsculas.
+    "moduleResolution": "node",                 // Especifica cómo se resuelven los módulos. "node" es adecuado para Node.js.
+    "allowJs": true                             // Permite incluir archivos .js si alguna vez los usas.
+  },
+  "include": [
+    "src/**/*.ts",   // Esto incluye todos los .ts dentro de src
+    "index.ts"       // Esto incluye también el archivo index.ts que está fuera de src
+  ],
+  "exclude": [
+    "node_modules"                        // Excluye la carpeta 'node_modules' de la compilación.
+  ]
+}

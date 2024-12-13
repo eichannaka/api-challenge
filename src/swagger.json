@@ -1,0 +1,271 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API ch allenge",
+    "version": "1.0.0",
+    "description": "API para gestionar el alquiler de scooters."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor local"
+    }
+  ],
+  "paths": {
+    "/api/scooters/locations": {
+      "get": {
+        "summary": "Lista de las 6 ubicaciones",
+        "tags": ["Scooters"],
+        "responses": {
+          "200": {
+            "description": "Lista de las 6 ubicaciones id, locacion y direccion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Location"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/api/scooters/locations/{locationId}": {
+      "get": {
+        "summary": "Listar scooters de una ubicación",
+        "tags": ["Scooters"],
+        "parameters": [
+          {
+            "name": "locationId",
+            "in": "path",
+            "required": true,
+            "description": "ID de la ubicación",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de scooters en la ubicación",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Scooter"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ubicación no encontrada"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/api/rentals/rent": {
+      "post": {
+        "summary": "Alquilar un scooter",
+        "tags": ["Rentals"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scooter alquilado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "availableMinutes": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error en la solicitud (parámetros inválidos o scooter no disponible)"
+          },
+          "404": {
+            "description": "Usuario o scooter no encontrado"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/api/rentals/return": {
+      "post": {
+        "summary": "Devolver un scooter",
+        "tags": ["Rentals"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReturnRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scooter devuelto exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error en la solicitud (ubicación incorrecta o llena)"
+          },
+          "404": {
+            "description": "Scooter o usuario no encontrado"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/api/rentals/{id}": {
+      "get": {
+        "summary": "Obtener alquileres de un usuario",
+        "tags": ["Rentals"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "ID del usuario",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "start_time",
+            "in": "query",
+            "required": false,
+            "description": "Tiempo de inicio del filtro",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end_time",
+            "in": "query",
+            "required": false,
+            "description": "Tiempo de fin del filtro",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de alquileres del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Rental"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Location": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "address": { "type": "string" }
+        }
+      },
+      "Scooter": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "location_id": { "type": "integer" },
+          "is_available": { "type": "boolean" }
+        }
+      },
+      "RentRequest": {
+        "type": "object",
+        "properties": {
+          "dni": { "type": "string" },
+          "scooter_id": { "type": "integer" },
+          "location_id": { "type": "integer" }
+        },
+        "required": ["dni", "scooter_id", "location_id"]
+      },
+      "ReturnRequest": {
+        "type": "object",
+        "properties": {
+          "dni": { "type": "string" },
+          "scooter_id": { "type": "integer" },
+          "location_id": { "type": "integer" }
+        },
+        "required": ["dni", "scooter_id", "location_id"]
+      },
+      "Rental": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "user_id": { "type": "integer" },
+          "scooter_id": { "type": "integer" },
+          "start_time": { "type": "string", "format": "date-time" },
+          "end_time": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}
