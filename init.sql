@@ -2,6 +2,12 @@ CREATE DATABASE IF NOT EXISTS api_challenge;
 
 USE api_challenge;
 
+CREATE TABLE locations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  address VARCHAR(255) NOT NULL
+);
+
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     dni VARCHAR(20) NOT NULL UNIQUE,
@@ -32,11 +38,6 @@ CREATE TABLE rentals (
 );
 
 
-CREATE TABLE locations (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  address VARCHAR(255) NOT NULL
-);
 
 
 
